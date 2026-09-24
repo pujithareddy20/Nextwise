@@ -36,8 +36,7 @@ public class DataInitializer implements CommandLineRunner {
         cleanupPreSeededServiceAgents();
 
         // 2. Ensure System Administrator exists
-        var adminOpt = userRepository.findByEmail("admin@supportdesk.com");
-        if (adminOpt.isEmpty()) {
+        if (userRepository.findByEmail("admin@supportdesk.com").isEmpty()) {
             userRepository.save(User.builder()
                     .fullName("System Administrator")
                     .email("admin@supportdesk.com")
@@ -45,12 +44,6 @@ public class DataInitializer implements CommandLineRunner {
                     .role(Role.ROLE_ADMIN)
                     .build());
             logger.info("Seeded System Administrator (admin@supportdesk.com)");
-        } else {
-            User existingAdmin = adminOpt.get();
-            existingAdmin.setRole(Role.ROLE_ADMIN);
-            existingAdmin.setPassword(passwordEncoder.encode("Admin@123"));
-            userRepository.save(existingAdmin);
-            logger.info("Synchronized System Administrator credentials (admin@supportdesk.com)");
         }
 
         // 3. Ensure Customer demo user exists

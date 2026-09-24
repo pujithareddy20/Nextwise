@@ -50,12 +50,6 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok("Login successful", response));
     }
 
-    @PostMapping("/admin/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> adminLogin(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.adminLogin(request);
-        return ResponseEntity.ok(ApiResponse.ok("Administrator login successful", response));
-    }
-
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserSummaryDto>> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         UserSummaryDto userSummary = authService.getCurrentUser(userPrincipal);

@@ -158,65 +158,18 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private Authentication authenticateUser(String rawEmail, String rawPassword) {
-        String identifier = rawEmail != null ? rawEmail.trim().toLowerCase() : "";
-        if ("admin".equals(identifier)) {
-            identifier = "admin@supportdesk.com";
-        }
-        String password = rawPassword != null ? rawPassword.trim() : "";
-
-        try {
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(identifier, password)
-            );
-        } catch (org.springframework.security.authentication.BadCredentialsException ex) {
-            if ("admin@supportdesk.com".equals(identifier)) {
-                String fallbackPassword = "Admin@123".equals(password) ? "admin@123" : "admin@123".equalsIgnoreCase(password) ? "Admin@123" : null;
-                if (fallbackPassword != null) {
-                    return authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(identifier, fallbackPassword)
-                    );
-                }
-            }
-            throw ex;
-        }
-    }
-
     @Override
     public AuthResponse login(LoginRequest request) {
-        Authentication authentication = authenticateUser(request.getEmail(), request.getPassword());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail().trim().toLowerCase(),
+                        request.getPassword()
+                )
+        );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        String token = tokenProvider.generateToken(authentication);
-
-        UserSummaryDto userSummary = UserSummaryDto.builder()
-                .id(userPrincipal.getId())
-                .fullName(userPrincipal.getFullName())
-                .email(userPrincipal.getEmail())
-                .role(userPrincipal.getRole())
-                .contactNumber(userPrincipal.getContactNumber())
-                .agentId(userPrincipal.getAgentId())
-                .build();
-
-        return AuthResponse.builder()
-                .accessToken(token)
-                .tokenType("Bearer")
-                .user(userSummary)
-                .build();
-    }
-
-    @Override
-    public AuthResponse adminLogin(LoginRequest request) {
-        Authentication authentication = authenticateUser(request.getEmail(), request.getPassword());
-
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        if (userPrincipal.getRole() != Role.ROLE_ADMIN) {
-            throw new org.springframework.security.access.AccessDeniedException("Access denied. Administrator credentials required.");
-        }
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.generateToken(authentication);
 
         UserSummaryDto userSummary = UserSummaryDto.builder()

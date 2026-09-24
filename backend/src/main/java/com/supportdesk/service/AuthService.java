@@ -13,6 +13,5 @@ public interface AuthService {
     AuthResponse registerCustomer(CustomerRegisterRequest request);
     AuthResponse registerAgent(AgentRegisterRequest request);
     AuthResponse login(LoginRequest request);
-    AuthResponse adminLogin(LoginRequest request);
     UserSummaryDto getCurrentUser(UserPrincipal userPrincipal);
 }
